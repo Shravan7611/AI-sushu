@@ -1,0 +1,152 @@
+import re
+import random
+
+def is_email_valid(email):
+    pattern = r'^[\w\.-]+@[\w\.-]+\.\w+$'
+    return re.match(pattern, email) is not None
+
+def welcome():
+    print("Hello! Welcome to the Customer Care AI Chatbot.")
+    print("I'm here to assist you with delivery, orders, tracking, contact info, and more.")
+
+def eexit():
+    print("Thank you for chatting with us. We hope we helped you appropriately.")
+
+def greetings():
+    print("Hello! How can I assist you today?")
+
+def tracking_status(tracking_number):
+    status_codes = [
+        "Your package is being prepared for shipment.",
+        "Your package has left the warehouse.",
+        "Your package is in transit.",
+        "Your package is out for delivery.",
+        "Your package has been delivered. Thank you for choosing us.",
+        "Your package delivery has been delayed due to unforeseen circumstances.",
+        "Your package is being returned to sender.",
+        "Your package was lost in transit. Please contact support.",
+        "Your package delivery schedule is being updated. Please check back later."
+    ]
+    status = random.choice(status_codes)
+    print(f"Tracking Status for {tracking_number}: {status}\n")
+
+def email_input():
+    print("Please enter your email address so we can keep you updated.")
+
+def contact_info():
+    print("You can reach us at:")
+    print("Phone: +1-800-123-4567")
+    print("Email: support@aabbcc.com")
+    print("Live Chat available on www.flipkart.com from 9am to 6pm Mon-Fri.\n")
+
+def order_guide():
+    print("Great! To place an order:")
+    print("1. Visit our website at www.flipkart.com")
+    print("2. Select the items you want")
+    print("3. Add them to your cart")
+    print("4. Proceed to checkout and complete your purchase")
+    print("You will get a confirmation email afterwards.\n")
+
+def chatbot():
+    welcome()
+    state = None
+
+    while True:
+        usinput = input("You: ").strip().lower()
+        if usinput in ['exit', 'bye', 'goodbye', 'see you']:
+            eexit()
+            break
+        if usinput in ['hi', 'hello', 'hey', 'good morning', 'good afternoon', 'good evening']:
+            greetings()
+            continue
+
+        if state == 'awaiting_tracking':
+            tracking_number = usinput.strip()
+            if not tracking_number.isalnum():
+                print("That doesn't look like a valid tracking number. It should be alphanumeric. Please try again or type 'exit' to cancel.")
+                continue
+            tracking_status(tracking_number)
+            print("Can I assist you with anything else? (yes/no)")
+            state = 'post_tracking'
+            continue
+
+        if state == 'awaiting_email':
+            email = usinput.strip()
+            if is_email_valid(email):
+                print(f"Thanks! We've recorded your email address ({email}) for updates.\n")
+                print("Do you need help with anything else? (yes/no)")
+                state = 'post_email'
+            else:
+                print("That doesn't seem like a valid email address. Please try again or type 'exit' to cancel.")
+            continue
+
+        if state == 'order_ask_guide':
+            if usinput in ['yes', 'y']:
+                order_guide()
+                print("Would you like help with anything else? (yes/no)")
+                state = 'post_order_guide'
+            elif usinput in ['no', 'n']:
+                print("No problem! Let me know if you want help with anything else.\n")
+                state = None
+            else:
+                print("Please answer with 'yes' or 'no'. Would you like me to guide you through placing an order?")
+            continue
+
+        if state in ['post_tracking', 'post_email', 'post_order_guide']:
+            if usinput in ['yes', 'y']:
+                print("Sure! What can I help you with? You can ask about delivery, orders, tracking, or contact info.")
+                state = None
+            elif usinput in ['no', 'n']:
+                print("Thank you for chatting with us. Have a wonderful day!")
+                break
+            else:
+                print("Please answer with 'yes' or 'no'. Can I assist you with anything else?")
+            continue
+
+        if state == 'delivery_ask_tracking':
+            if usinput in ['yes', 'y']:
+                print("Please provide your tracking number.")
+                state = 'awaiting_tracking'
+            elif usinput in ['no', 'n']:
+                print("Okay! If you have other questions, just ask.")
+                state = None
+            else:
+                print("Please answer with 'yes' or 'no'. Would you like to check your tracking status?")
+            continue
+
+        # General conversation state
+        if any(word in usinput for word in ['delivery', 'deliver', 'shipping']):
+            print("We provide standard and express delivery options.")
+            print("Standard delivery takes 3-5 business days; express delivery takes 1-2 business days.")
+            print("Would you like to check your tracking status? (yes/no)")
+            state = 'delivery_ask_tracking'
+        elif 'order' in usinput:
+            print("You can place an order via our website www.flipkart.com")
+            print("Would you like me to guide you through placing an order? (yes/no)")
+            state = 'order_ask_guide'
+        elif 'track' in usinput or 'tracking' in usinput:
+            print("Sure! Please provide your tracking number.")
+            state = 'awaiting_tracking'
+        elif ('email' in usinput or 'update' in usinput) and 'contact' in usinput:
+            email_input()
+            state = 'awaiting_email'
+        elif any(word in usinput for word in ['contact', 'help', 'support']):
+            contact_info()
+            print("Can I help you with anything else? (yes/no)")
+            state = 'post_contact'
+        elif state == 'post_contact':
+            if usinput in ['yes', 'y']:
+                print("Great! What else can I help you with?")
+                state = None
+            elif usinput in ['no', 'n']:
+                print("Thank you for chatting with us. Have a great day!")
+                break
+            else:
+                print("Please answer with 'yes' or 'no'. Can I assist you with anything else?")
+        elif usinput == '':
+            print("I didn't catch that. Can you please type your question or request?")
+        else:
+            print("Sorry, I didn't quite get that. You can ask me about delivery, orders, tracking or contact info.")
+
+if __name__ == '__main__':
+    chatbot()
